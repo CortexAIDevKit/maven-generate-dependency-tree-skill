@@ -1,62 +1,54 @@
 ---
 name: maven-generate-dependency-tree
-description: GitHub copilot skill to generate maven dependency tree
-tools: ['editFiles']
+description: Generate a timestamped maven dependency tree report in markdown format.
+argument-hint: "timestamp=<yyyymmdd-hhmmss>, outputPath=<directory-path>"
 authors: ["paul58914080@gmail.com"]
-inputs:
-  name:
-    description: Name of the person to greet
-    required: true
 ---
 
-# maven-generate-dependency-tree
+# Generate Dependency Tree Report
+
+Run a maven command to generate a dependency tree report in markdown format. The report will be timestamped and saved to the specified output directory.
 
 ## Purpose
 
-[//]: # (todo: Describe the persona of the skill and explain what the skill does.)
+The purpose of this skill is to generate a comprehensive dependency tree for a Maven project, which helps in understanding the project's dependencies and their relationships.
 
-A minimal "hello world" style skill. Given a person's name, it renders a
-friendly greeting from a template. Use this as a starting point — replace the
-greeting logic with your own behavior.
+Use this skill when you need a detailed view of the dependencies in a Maven project, with an output file path derived from:
+
+- `timestamp`: A string in the format `yyyymmdd-hhmmss` representing the time when the report is generated.
+- `outputPath`: A string representing the directory path where the generated report will be saved.
+
+Trigger examples: 
+
+- `Run generate-dependency-tree with defaults`
+- `Run generate dependency tree`
+- `Run generate maven dependency tree`
+- `Run the maven dependency tree report with timestamp=20240101-120000`
+- `Run dependency tree report with timestamp=20240101-120000 and outputPath=/reports/dependency-tree`
 
 ## Inputs
 
-[//]: # (todo: List the expected inputs for the skill. Be specific about the format and content of each input. This helps the agent prepare the necessary information before invoking the skill.). Use the input key in the metadata above to reference these inputs.
+Optional inputs include:
 
-- `name` (string, required) — the person to greet (e.g. `"Ada"`).
+- `timestamp`: A string in the format `yyyymmdd-hhmmss` representing the time when the report is generated. If not provided, the current timestamp will be used.
+- `outputPath`: A string representing the directory path where the generated report will be saved. If not provided, the report will be saved in `maven-dependency-tree` directory.
 
-## Execution
+## Execution order
 
-[//]: # (todo: Describe how the skill is executed. Include any necessary steps, conditions, or actions that the skill performs.)
+1. Resolve the timestamp and outputPath inputs, using defaults if necessary.
+2. Create the target directory: cortexaidevkit/<timestamp>/<outputPath> if it does not exist.
+3. Run this command in the root directory of the Maven project after resolving the inputs: 
+    ```
+    sh ./.github/skills/maven-generate-dependency-tree/scripts/maven-generate-dependency-tree.sh -t <timestamp> -o <outputPath>
+    ```
 
-Run the greeting script with the `name` input. It loads
-`./template/output-template.md`, substitutes `` and ``, and
-prints the result to stdout.
+## Decision points
 
-```bash
-sh ./scripts/maven-generate-dependency-tree.sh "$name"
-```
+- If timestamp is invalid, stop and request a valid timestamp in the format `yyyymmdd-hhmmss`.
+- If outputPath is invalid, stop and request a valid directory path.
+- If maven i.e. `mvn` is unavailable, stop and report that Maven is required to run this skill.
+- If the command fails, stop and report the error code, message, and any relevant details to help diagnose the issue.
 
-## Outputs
+## Quality checks
 
-[//]: # (todo: List the expected outputs for the skill. Be specific about the format and content of each output. This helps the agent understand what to expect after the skill is executed.)
-
-The generated output **must strictly follow**:
-
-`./template/output-template.md`
-
-### Example Output
-
-```markdown
-# Greeting
-
-Hello, **Ada**!
-
-Welcome to the `maven-generate-dependency-tree` skill.
-
-_Generated on 2026-05-17._
-```
-
-## Post-Execution
-
-[//]: # (todo: Describe any post-execution steps or actions that need to be taken after the skill has been executed. This could include cleanup tasks, notifications, or further processing of the outputs.)
+- Verify that the generated report file exists in the specified path i.e. cortexaidevkit/<timestamp>/<outputPath>/dependency.dot
