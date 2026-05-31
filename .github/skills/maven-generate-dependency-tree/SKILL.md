@@ -47,6 +47,7 @@ Optional inputs include:
 - If timestamp is invalid, stop and request a valid timestamp in the format `yyyymmdd-hhmmss`.
 - If outputPath is invalid, stop and request a valid directory path.
 - If maven i.e. `mvn` is unavailable, stop and report that Maven is required to run this skill.
+- If no `pom.xml` is found in the current directory, stop and report that the skill must run from the Maven project root.
 - If the command fails, stop and report the error code, message, and any relevant details to help diagnose the issue.
 
 ## Quality checks
